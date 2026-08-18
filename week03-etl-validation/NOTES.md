@@ -10,3 +10,6 @@
 <!-- How many rows ended up quarantined, and does that match the 7 known
      injected problems? (It won't match exactly — some rows may trip more
      than one expectation. Explain the discrepancy if there is one.) -->
+6 rows got quarantined
+8 violations which match the 7 known problems
+2 rows had onw extra violation (so it may not match exactly 7)
