@@ -12,4 +12,4 @@
      than one expectation. Explain the discrepancy if there is one.) -->
 6 rows got quarantined
 8 violations which match the 7 known problems
-2 rows had onw extra violation (so it may not match exactly 7)
+2 rows had onw extra violation (so it may not match exactly 7) 
