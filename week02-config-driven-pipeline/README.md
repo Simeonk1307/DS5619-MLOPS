@@ -4,7 +4,7 @@
 
 ## Setup
 
-```bash
+```bash 
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python generate_for_student.py --student-id <your roll number>
