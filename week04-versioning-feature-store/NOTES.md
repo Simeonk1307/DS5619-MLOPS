@@ -2,6 +2,7 @@
 
 **Student ID used with `generate_for_student.py`:**
 <!-- paste the --student-id value you used -->
+112301031
 
 
 ## v1 vs. v2 manifest comparison
