@@ -97,7 +97,7 @@ This is a self-check, not the grader.
 - [ ] `get_lineage` correctly resolves a feature group back to its raw source
       manifest.
 - [ ] `NOTES.md` shows you actually compared the v1 and v2 manifests.
-- [ ] Meaningful commit history and a working README.
+- [ ] Meaningful commit history and a working README. 
 
 ## Submission
 
