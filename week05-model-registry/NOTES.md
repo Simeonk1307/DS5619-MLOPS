@@ -17,7 +17,7 @@ v2 reached production because the f1 of v2 model exceeded the set threshold of 0
      to block promotion of a model trained on stale (e.g. >30-day-old)
      feature data? -->
 The model card should have the least event time of a transaction also stored.
-We will check if datetime.now(timezone.utc) - training_end).days > 30 then raise governance error else accept
+We will check if datetime.now(timezone.utc) - training_end.days > 30 then raise governance error else accept
 
 
 ## Scaling the gate to 40 candidates
