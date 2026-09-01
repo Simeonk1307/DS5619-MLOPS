@@ -1,0 +1,15 @@
+{
+  "name": "fraud-detector",
+  "version_id": "v2",
+  "intended_use": "Fraud detection model (amount threshold classifier). Banks are the target users who check for fraudulent transactions.",
+  "training_data": "Trained on minimal subset being `card_activity` feature group being {card_id, max_amount}. Limits being it overlooks the influence of time, distribution and of transactions which are significant signals which cannot be overlooked.",
+  "limitations": "The model should not be trusted in 1) Distributing the amount over time (every transaction has less than threshold amount but number of transactions can be high) 2) Distributing the amount over cards (using multiple cards for the same agenda).",
+  "ethical_considerations": "1) false positive here (users bear it) (a legitimate transaction blocked) - leads to loss of trust and bad customer experience vs. a false negative (banks bear it) (fraud that gets through) - leads to legal issues, loss of reputation (if brought to notice) and financial losses to fix that fraudulent transaction.",
+  "metrics": {
+    "precision": 0.934,
+    "recall": 0.846,
+    "f1": 0.888,
+    "auc": 0.95
+  },
+  "created_at": "2026-09-01T05:31:19.207403+00:00"
+}
