@@ -6,7 +6,7 @@
 
 # TODO: pick a small official Python base image. A "slim" variant is enough
 # here — we have no torch/GPU dependency, just Flask + Pillow.
-FROM ???
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -14,11 +14,11 @@ WORKDIR /app
 # --no-cache-dir to keep the image smaller (pip's download cache adds
 # nothing useful inside a container that's rebuilt from scratch each time).
 COPY requirements.txt .
-RUN ???
+RUN pip install --no-cache-dir -r requirements.txt
 
 # TODO: copy the rest of the application source (the src/ directory) into
 # the image.
-COPY ??? ???
+COPY ./src .
 
 # Document which port the container listens on (this doesn't publish the
 # port to the host by itself — `docker run -p` does that — but it's how
@@ -27,4 +27,4 @@ EXPOSE 8080
 
 # TODO: the command that starts the server when the container runs. Look at
 # the bottom of src/app.py to see how it's invoked directly with `python`.
-CMD [???]
+CMD ["python3", "app.py"]
