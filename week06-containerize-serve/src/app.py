@@ -35,8 +35,11 @@ def load_image_from_upload(file_storage):
     (uploaded images may be non-RGB, e.g. RGBA or palette mode, and the
     detector expects RGB pixel tuples).
     """
-    # TODO: implement
-    raise NotImplementedError
+    raw_bytes = file_storage.read()
+    image = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+
+    return image
+    
 
 
 def run_detection(image):
@@ -49,8 +52,12 @@ def run_detection(image):
     (image_id=0 is fine — this endpoint handles one image per request, it
     doesn't need a real dataset-wide id.)
     """
-    # TODO: implement
-    raise NotImplementedError
+    detection_objects = det.detect(image)
+
+    return {
+      "count": len(detection_objects),
+      "detections": det.detections_to_coco(detection_objects, image_id=0)
+    }
 
 
 def create_app():
@@ -70,8 +77,13 @@ def create_app():
           run_detection(...) on it, and return jsonify(<that result>) with
           the default 200 status.
         """
-        # TODO: implement
-        raise NotImplementedError
+        if "image" not in request.files:
+            return (jsonify({"error": "missing 'image' file field"}), 400)
+        
+        image = load_image_from_upload(request.files["image"])
+        result = run_detection(image)
+
+        return jsonify(result, 200)
 
     return app
 
