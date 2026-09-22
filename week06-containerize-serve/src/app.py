@@ -83,7 +83,7 @@ def create_app():
         image = load_image_from_upload(request.files["image"])
         result = run_detection(image)
 
-        return jsonify(result, 200)
+        return jsonify(result)
 
     return app
 

@@ -8,7 +8,7 @@
 ## Built image size
 
 <!-- What image size did `docker images` report for week6-detector? -->
-157MB
+57.6MB
 
 
 ## Swapping in a real checkpoint
