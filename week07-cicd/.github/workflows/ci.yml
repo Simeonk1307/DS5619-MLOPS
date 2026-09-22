@@ -56,4 +56,4 @@ jobs:
       # VERIFY: make the script executable and run it
       - name: Run integration test
         run: |
-          chmod +x scripts/integration_test.sh && ./integration_test.sh
+          chmod +x scripts/integration_test.sh && ./scripts/integration_test.sh

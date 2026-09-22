@@ -8,7 +8,7 @@
 # `needs:`) — no point spending minutes building a container for code that
 # doesn't even lint or pass its unit tests.
 
-name: CI
+name: Week07-CI
 
 on:
   push:
@@ -69,4 +69,4 @@ jobs:
       # VERIFY: make the script executable and run it
       - name: Run integration test
         run: |
-          chmod +x scripts/integration_test.sh && ./integration_test.sh
+          chmod +x scripts/integration_test.sh && ./scripts/integration_test.sh
