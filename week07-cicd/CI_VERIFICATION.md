@@ -17,9 +17,9 @@ TODO
 
 For each job, note pass/fail and how long it took:
 
-- `lint`: TODO
-- `unit-test`: TODO
-- `integration-test`: TODO
+- `lint`: pass
+- `unit-test`: pass
+- `integration-test`: pass
 
 ## What broke on the way there (optional but useful)
 
