@@ -1,0 +1,3 @@
+- Added a workflow which was copied to the root ensuring it uses and works on the right folder and also ensure the test running folder context is the week7 folder
+- Looked into the documentation on how to run flake8, docker build with tagging and also docker run with apt params
+- ensured the actions work with the ci pipeline and nensured it works and noted dow the the time
