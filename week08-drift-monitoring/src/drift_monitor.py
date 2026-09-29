@@ -46,8 +46,14 @@ def extract_confidence_scores(camera_dir):
     Use Image.open(path).convert("RGB") to load each image, then
     det.detect(image) to get its detections, and collect d.score from each.
     """
-    # TODO: implement
-    raise NotImplementedError
+    conf_scores = []
+    img_paths = sorted(glob.glob(os.path.join(camera_dir, "*.jpg")))
+    for path in img_paths:
+        with Image.open(path).convert("RGB") as img:
+            detections = det.detect(img)
+            for d in detections:
+                conf_scores.append(float(d.score))
+    return conf_scores
 
 
 # ---------------------------------------------------------------------------
@@ -70,8 +76,35 @@ def compute_psi(reference_scores, live_scores, n_bins=N_BINS):
       5. Return the PSI value (float). Larger values mean more drift; PSI
          is 0 when the two distributions are identical.
     """
-    # TODO: implement
-    raise NotImplementedError
+    bin_width = 1.0 / n_bins
+    ref_counts = [0] * n_bins
+    live_counts = [0] * n_bins
+
+    def get_bin_index(score):
+        if score >= 1.0:
+            return n_bins - 1
+        idx = int(score // bin_width)
+        if idx >= n_bins:
+            idx = n_bins - 1
+        elif idx < 0:
+            idx = 0
+        return idx
+
+    for s in reference_scores:
+        ref_counts[get_bin_index(s)] += 1
+        
+    for s in live_scores:
+        live_counts[get_bin_index(s)] += 1
+
+    total_ref = len(reference_scores)
+    total_live = len(live_scores)
+    
+    psi_value = 0.0
+    for i in range(n_bins):
+        ref_pct = max(ref_counts[i] / total_ref, 1e-4) if total_ref > 0 else 0.0
+        live_pct = max(live_counts[i] / total_live, 1e-4) if total_live > 0 else 0.0
+        psi_value += (live_pct - ref_pct) * math.log(live_pct / ref_pct) 
+    return psi_value
 
 
 # ---------------------------------------------------------------------------
@@ -86,8 +119,12 @@ def classify_drift(psi):
 
     Return one of those three strings.
     """
-    # TODO: implement
-    raise NotImplementedError
+    if psi < PSI_MODERATE_THRESHOLD:
+        return "none"
+    elif psi < PSI_SIGNIFICANT_THRESHOLD:
+        return "moderate"
+    else:
+        return "significant"
 
 
 # ---------------------------------------------------------------------------
@@ -100,5 +137,19 @@ def summarize_scores(scores):
     count. Use the `statistics` module (mean, stdev — if len(scores) < 2,
     std should be 0.0 rather than raising).
     """
-    # TODO: implement
-    raise NotImplementedError
+    count = len(scores)
+    if count == 0:
+        return {"count": 0, "mean": 0.0, "std": 0.0, "min": 0.0, "max": 0.0}
+        
+    mean_val = statistics.mean(scores)
+    min_val = min(scores)
+    max_val = max(scores)
+    std_val = 0.0 if count < 2 else statistics.stdev(scores)
+        
+    return {
+        "count": count,
+        "mean": round(mean_val, 4),
+        "std": round(std_val, 4),
+        "min": round(min_val, 4),
+        "max": round(max_val, 4)
+    }

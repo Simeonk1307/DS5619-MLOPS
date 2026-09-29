@@ -2,6 +2,7 @@
 
 **Student ID used with `generate_for_student.py`:**
 <!-- paste the --student-id value you used -->
+112301031
 
 
 ## Drift level vs. expectation
@@ -9,6 +10,8 @@
 <!-- What drift level did the report show, and does that match what you'd
      expect given the two cameras were built with deliberately different
      visual statistics? -->
+     moderate drift level
+     yes it makes sense
 
 
 ## What confidence-score-only monitoring misses
