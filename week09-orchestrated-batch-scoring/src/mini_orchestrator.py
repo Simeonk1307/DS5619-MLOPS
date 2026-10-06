@@ -48,9 +48,30 @@ def topological_order(tasks: Dict[str, Task]) -> List[str]:
     append it to the result. If you run out of in-degree-0 tasks before
     placing every task, there's a cycle.
     """
-    # TODO: implement
-    raise NotImplementedError
+    adjlist = {name: [] for name in tasks}
+    indegrees = {name: 0 for name in tasks}
+    
+    for task_name, task in tasks.items():
+      for parent in task.depends_on:
+        if parent not in tasks:
+          raise ValueError(f"Task '{task_name}' depends on non-existent task '{parent}'")
+        adjlist[parent].append(task_name)
+        indegrees[task_name] += 1
 
+    result = []
+    queue = [name for name, degree in indegrees.items() if degree == 0]
+    while queue:
+      current = queue.pop(0)
+      result.append(current)
+      for neighbor in adjlist[current]:
+        indegrees[neighbor] -= 1
+        if indegrees[neighbor] == 0:
+          queue.append(neighbor)
+
+    if len(result) != len(tasks):
+      raise ValueError("A dependency cycle was detected in the given tasks.")
+
+    return result
 
 # ---------------------------------------------------------------------------
 # Part 2 — Retry a single task
@@ -67,8 +88,18 @@ def run_task_with_retry(task: Task, context: dict) -> int:
     If it never succeeds, let the LAST exception propagate (don't swallow
     it) after all retries are exhausted.
     """
-    # TODO: implement
-    raise NotImplementedError
+    allowed_attempts = 1 + task.max_retries
+    
+    for attempt in range(1, allowed_attempts + 1):
+      try:
+        task.fn(context)
+        return attempt
+      except Exception:
+        if attempt == allowed_attempts:
+          raise
+
+        if task.retry_delay_seconds > 0:
+          time.sleep(task.retry_delay_seconds)
 
 
 # ---------------------------------------------------------------------------
@@ -92,5 +123,18 @@ def run_dag(tasks: Dict[str, Task], context: dict) -> dict:
 
     Return {"order": <the order you computed>, "task_results": task_results}.
     """
-    # TODO: implement
-    raise NotImplementedError
+    order = topological_order(tasks)
+    task_results = {}
+
+    for task_name in order:
+      task = tasks[task_name]
+      allowed_attempts = 1 + task.max_retries
+      
+      try:
+        attempts_taken = run_task_with_retry(task, context)
+        task_results[task_name] = {"status": "success", "attempts": attempts_taken}
+      except Exception as exc:
+        task_results[task_name] = {"status": "failed", "attempts": allowed_attempts, "error": str(exc)}
+        break
+
+    return {"order": order, "task_results": task_results}
