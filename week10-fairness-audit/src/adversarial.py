@@ -45,9 +45,15 @@ def perturb_image(img, eps):
     function to every value of a single-channel image; Image.merge("RGB",
     ...) puts them back. No per-pixel Python loop is needed.
     """
-    # TODO: implement
-    raise NotImplementedError
+    if eps == 0:
+        return img.copy()
 
+    r, g, b = img.split()
+    r_perturbed = r.point(lambda p: max(0, p - eps))
+    g_perturbed = g.point(lambda p: min(255, p + eps))
+    b_perturbed = b.point(lambda p: min(255, p + eps))
+
+    return Image.merge("RGB", (r_perturbed, g_perturbed, b_perturbed))
 
 # ---------------------------------------------------------------------------
 # Part 6 — Re-run the audit under attack
@@ -62,8 +68,20 @@ def audit_under_attack(coco_path, fixtures_dir, eps_values=(0, 10, 20, 30, 40),
     Return {eps: category_stats}, where category_stats is exactly what
     audit_by_category returns. eps=0 is the clean audit.
     """
-    # TODO: implement
-    raise NotImplementedError
+    attack_results = {}
+
+    for eps in eps_values:
+        transform_fn = (lambda image, e=eps: perturb_image(image, e))
+
+        stats = fa.audit_by_category(
+            coco_path=coco_path,
+            fixtures_dir=fixtures_dir,
+            iou_threshold=iou_threshold,
+            transform=transform_fn,
+        )
+        attack_results[eps] = stats
+
+    return attack_results
 
 
 # ---------------------------------------------------------------------------
@@ -83,5 +101,17 @@ def find_most_fragile(attack_stats, eps, top_k=3):
     change with the student ID. run_pipeline.py also reports the classes with
     the lowest ABSOLUTE recall under attack; compare the two in NOTES.md.
     """
-    # TODO: implement
-    raise NotImplementedError
+    clean_stats = attack_stats[0]
+    attacked_stats = attack_stats[eps]
+
+    drops = []
+    for cat_name, clean_info in clean_stats.items():
+        if cat_name in attacked_stats:
+            clean_recall = clean_info["recall"]
+            attacked_recall = attacked_stats[cat_name]["recall"]
+            drop = round(clean_recall - attacked_recall, 4)
+            drops.append((cat_name, drop))
+
+    drops.sort(key=lambda x: (-x[1], x[0]))
+
+    return drops[:top_k]
