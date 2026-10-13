@@ -57,8 +57,28 @@ def compute_iou(box_a, box_b):
       4. union_area = area(box_a) + area(box_b) - intersection_area
       5. Return intersection_area / union_area, or 0.0 if union_area is 0.
     """
-    # TODO: implement
-    raise NotImplementedError
+    x1_a, y1_a, x2_a, y2_a = box_a[0], box_a[1], box_a[0] + box_a[2], box_a[1] + box_a[3]
+    x1_b, y1_b, x2_b, y2_b = box_b[0], box_b[1], box_b[0] + box_b[2], box_b[1] + box_b[3]
+
+    inter_x1 = max(x1_a, x1_b)
+    inter_y1 = max(y1_a, y1_b)
+    inter_x2 = min(x2_a, x2_b)
+    inter_y2 = min(y2_a, y2_b)
+
+    inter_w = max(0.0, inter_x2 - inter_x1)
+    inter_h = max(0.0, inter_y2 - inter_y1)
+    intersection_area = inter_w * inter_h
+
+    area_a = box_a[2] * box_a[3]
+    area_b = box_b[2] * box_b[3]
+    union_area = area_a + area_b - intersection_area
+
+    if union_area <= 0:
+      return 0.0
+
+    return intersection_area / union_area
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -66,20 +86,28 @@ def compute_iou(box_a, box_b):
 # ---------------------------------------------------------------------------
 
 def match_ground_truth(gt_boxes, detections, iou_threshold=0.3):
-    """`gt_boxes` is a list of [x, y, w, h]. `detections` is a list of
-    mock_detector.Detection objects (each has a .bbox attribute, also
-    [x, y, w, h]).
+  """`gt_boxes` is a list of [x, y, w, h]. `detections` is a list of
+  mock_detector.Detection objects (each has a .bbox attribute, also
+  [x, y, w, h]).
 
-    Return a list of booleans, same length and order as gt_boxes: True if
-    that ground-truth box has IoU >= iou_threshold with AT LEAST ONE
-    detection (use compute_iou), False otherwise.
+  Return a list of booleans, same length and order as gt_boxes: True if
+  that ground-truth box has IoU >= iou_threshold with AT LEAST ONE
+  detection (use compute_iou), False otherwise.
 
-    Note: this is a recall check, not one-to-one matching — the same
-    detection CAN count as a match for more than one ground-truth box if it
-    happens to overlap both (rare with real data, fine for this audit).
-    """
-    # TODO: implement
-    raise NotImplementedError
+  Note: this is a recall check, not one-to-one matching — the same
+  detection CAN count as a match for more than one ground-truth box if it
+  happens to overlap both (rare with real data, fine for this audit).
+  """
+  matches = []
+    
+  for gt_box in gt_boxes:
+    is_matched = False
+    for det in detections:
+      if compute_iou(gt_box, det.bbox) >= iou_threshold:
+        is_matched = True
+        break
+    matches.append(is_matched)
+  return matches
 
 
 # ---------------------------------------------------------------------------
@@ -111,8 +139,51 @@ def audit_by_category(coco_path, fixtures_dir, iou_threshold=0.3, transform=None
     lookup from category_id -> category name, before the main loop. Image
     file paths are `os.path.join(fixtures_dir, image["file_name"])`.
     """
-    # TODO: implement
-    raise NotImplementedError
+    with open(coco_path, "r", encoding="utf-8") as f:
+      coco_data = json.load(f)
+
+    cat_id_to_name = {
+      cat["id"]: cat["name"] for cat in coco_data.get("categories", [])
+    }
+    
+    img_id_to_anns = defaultdict(list)
+    for ann in coco_data.get("annotations", []):
+      img_id_to_anns[ann["image_id"]].append(ann)
+
+    counts = defaultdict(lambda: {"total": 0, "detected": 0})
+
+    for img_info in coco_data.get("images", []):
+      img_id = img_info["id"]
+      img_anns = img_id_to_anns.get(img_id, [])
+      if not img_anns:
+        continue
+      img_path = os.path.join(fixtures_dir, img_info["file_name"])
+      image = Image.open(img_path).convert("RGB")
+      if transform is not None:
+        image = transform(image)
+      detections = det.detect(image)
+      gt_boxes = [ann["bbox"] for ann in img_anns]
+      cat_names = [cat_id_to_name[ann["category_id"]] for ann in img_anns]
+      matched_flags = match_ground_truth(gt_boxes, detections, iou_threshold=iou_threshold)
+      for cat_name, is_matched in zip(cat_names, matched_flags):
+        counts[cat_name]["total"] += 1
+        if is_matched:
+          counts[cat_name]["detected"] += 1
+
+    results = {}
+    for cat_name, stats in counts.items():
+      total = stats["total"]
+      if total == 0:
+        continue
+      detected = stats["detected"]
+      recall = round(detected / total, 4)
+      results[cat_name] = {
+        "total": total,
+        "detected": detected,
+        "recall": recall,
+      }
+
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -126,5 +197,11 @@ def find_underperforming_categories(category_stats, recall_threshold=0.90):
     whose recall is BELOW recall_threshold, sorted worst-first (lowest
     recall first).
     """
-    # TODO: implement
-    raise NotImplementedError
+    underperforming_cats = []
+    for cat_name, stats in category_stats.items():
+      recall = stats["recall"]
+      if recall < recall_threshold:
+        underperforming_cats.append((cat_name, recall))
+
+    underperforming_cats.sort(key=lambda item: item[1])
+    return underperforming_cats
