@@ -12,7 +12,7 @@ import tempfile
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO_ROOT, "src"))
-import compression as comp  # noqa: E402
+import compression2 as comp  # noqa: E402
 
 
 def test_model_size_bytes():
